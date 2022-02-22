@@ -3,18 +3,35 @@ using UnityEngine;
 
 namespace Datapad
 {
-    public class AudioPlayer : MonoBehaviour
+    public class AudioPlayer : Singleton<AudioPlayer>
     {
-        [SerializeField] private AudioSource audioSource;
+        private const string CurrentActivityName = "currentActivity";
+        private const string UnityClassName = "com.unity3d.player.UnityPlayer";
+        private const string AudioPlayerClassName = "com.datapad.audioplayer.AudioPlayer";
+        private const string SetActivityInstanceMethodName = "setActivityInstance";
+        private const string PlayAudioMethodName = "PlayAudio";
+
+
+        private AndroidJavaClass unityClass;
+        private AndroidJavaClass audioPlayer;
         
-        public void PlayAudio(AudioAsset audioAsset)
-        {
+        private AndroidJavaObject unityActivity;
+
+        public void PlayAudio(AudioAssetConfig audioAssetConfig)
+        {   
             Debug.Log($"{nameof(AudioPlayer)}.{nameof(PlayAudio)}: " +
-                      $"Playing AudioAsset {audioAsset.FileName}.");
+                      $"Playing AudioAsset {audioAssetConfig.FileName}.");
+            
+            audioPlayer.CallStatic(PlayAudioMethodName, audioAssetConfig.LocalPath);
+        }
 
-
-            audioSource.clip = audioAsset.AudioClip;
-            audioSource.Play();
+        protected override void OnAwake()
+        {
+            base.OnAwake();
+            unityClass = new(UnityClassName);
+            audioPlayer = new(AudioPlayerClassName);
+            unityActivity = unityClass.GetStatic<AndroidJavaObject>(CurrentActivityName);
+            audioPlayer.CallStatic(SetActivityInstanceMethodName, unityActivity);
         }
     }
 }

@@ -7,8 +7,8 @@ namespace Datapad
         private const string AudioFileType = "audio/*";
         private readonly string[] _fileTypes = { AudioFileType };
 
-        [SerializeField] private AudioImporter audioImporter;
         [SerializeField] private AudioPlayer audioPlayer;
+        [SerializeField] private AudioLibraryConfigHandler audioLibraryConfigHandler;
         
         public void SelectAudioFile()
         {
@@ -25,7 +25,7 @@ namespace Datapad
                 return;
             }
 
-            StartCoroutine(audioImporter.ImportAudio(path, asset =>
+            StartCoroutine(AudioImporter.Instance.ImportAudioAsset(path, asset =>
             {
                 if (asset == null)
                 {
@@ -40,7 +40,7 @@ namespace Datapad
                           $"Local Path: {asset.LocalPath}, " +
                           $"AudioClip: {asset.AudioClip}");
                 
-                audioPlayer.PlayAudio(asset);
+                audioLibraryConfigHandler.AddNewAudioAsset(asset);
             }));
         }
     }
