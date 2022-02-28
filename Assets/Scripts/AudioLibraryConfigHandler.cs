@@ -1,44 +1,58 @@
+using System.Collections.Generic;
 using System.IO;
 using Datapad.Models;
-using Datapad.UI;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Datapad
 {
-    public class AudioLibraryConfigHandler : MonoBehaviour
+    public class AudioLibraryConfigHandler : Singleton<AudioLibraryConfigHandler>
     {
         private const string LibraryConfigFileName = "AudioLibraryConfig.json";
+        private string _audioLibraryConfigPath;
 
         private AudioLibraryConfig AudioLibraryConfig { get; set; }
 
-        private string _audioLibraryConfigPath;
-
         public void AddNewAudioAsset(AudioAssetConfig assetConfig)
         {
-            AudioLibraryConfig.assets.Add(assetConfig);
+            if (!AudioLibraryConfig.TryAdd(assetConfig))
+                return;
+            
             SaveConfigToDisk();
-            AudioGallery.Instance.AddAudioAssetSlot(assetConfig);
+            AudioAssetConfig.OnAudioAssetCreated.Invoke(assetConfig);
         }
         
         private void Awake()
         {
             _audioLibraryConfigPath = Path.Combine(Application.persistentDataPath, LibraryConfigFileName);
+            TryLoadLibraryConfig();
+        }
 
+        private void TryLoadLibraryConfig()
+        {
             if (!File.Exists(_audioLibraryConfigPath))
             {
-                Log(nameof(Awake), "Config Not Found. Creating New One.");
-                AudioLibraryConfig = new AudioLibraryConfig();
-                SaveConfigToDisk();
+                CreateNewLibraryConfig();
                 return;
             }
 
             string libraryJson = File.ReadAllText(_audioLibraryConfigPath);
             Log(nameof(Awake), $"Config Found: \n{libraryJson}");
             AudioLibraryConfig = JsonConvert.DeserializeObject<AudioLibraryConfig>(libraryJson);
-            AudioGallery.Instance.DisplayLibrary(AudioLibraryConfig);
         }
 
+        private void CreateNewLibraryConfig()
+        {
+            Log(nameof(Awake), "Config Not Found. Creating New One.");
+            
+            AudioLibraryConfig = new AudioLibraryConfig
+            {
+                Assets = new List<AudioAssetConfig>()
+            };
+            
+            SaveConfigToDisk();
+        }
+        
         private void SaveConfigToDisk()
         {
             string libraryJson = JsonConvert.SerializeObject(AudioLibraryConfig);

@@ -1,3 +1,4 @@
+using System;
 using Datapad.Models;
 using UnityEngine;
 
@@ -7,18 +8,20 @@ namespace Datapad.UI
     {
         [SerializeField] private AudioAssetSlot slotPrefab;
         [SerializeField] private Transform slotParent;
-        
-        public void DisplayLibrary(AudioLibraryConfig libraryConfig)
+
+        public void AddAudioAssetSlot(AudioAssetConfig asset)
         {
-            foreach (var asset in libraryConfig.assets)
-                AddAudioAssetSlot(asset);
+            Instantiate(slotPrefab, slotParent).Initialize(asset);
         }
 
-        public void AddAudioAssetSlot(AudioAssetConfig config)
+        private void OnEnable()
         {
-            AudioAssetSlot slot = Instantiate(slotPrefab, slotParent);
-            AudioImporter.Instance.LoadAudioAsset(config);
-            slot.Initialize(config);
+            AudioAssetConfig.OnAudioAssetCreated.AddListener(AddAudioAssetSlot);
+        }
+
+        private void OnDisable()
+        {
+            AudioAssetConfig.OnAudioAssetCreated.RemoveListener(AddAudioAssetSlot);
         }
     }
 }
