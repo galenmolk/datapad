@@ -30,10 +30,10 @@ namespace Datapad.AudioPlayers
 
         private IAudioPlayer GetAudioPlayer()
         {
-            #if UNITY_EDITOR
-                return gameObject.GetOrAddComponent<EditorAudioPlayer>();
-            #elif UNITY_ANDROID
+            #if UNITY_ANDROID && !UNITY_EDITOR
                 return new AndroidAudioPlayer();
+            #else
+                return gameObject.GetOrAddComponent<EditorAudioPlayer>();
             #endif
         }
     }

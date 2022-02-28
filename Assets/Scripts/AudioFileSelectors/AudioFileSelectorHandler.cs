@@ -23,6 +23,8 @@ namespace Datapad
                 return new EditorAudioFileSelector();
             #elif UNITY_ANDROID
                 return new AndroidAudioFileSelector();
+            #else
+                return new UnsupportedAudioFileSelector();
             #endif
         }
     }

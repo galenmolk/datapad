@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace Datapad.UI
 {
-    public class AudioGallery : Singleton<AudioGallery>
+    public class AudioGallery : MonoBehaviour
     {
         [SerializeField] private AudioAssetSlot slotPrefab;
         [SerializeField] private Transform slotParent;
 
-        public void AddAudioAssetSlot(AudioAssetConfig asset)
+        private void AddAudioAssetSlot(AudioAssetConfig asset)
         {
             Instantiate(slotPrefab, slotParent).Initialize(asset);
         }
