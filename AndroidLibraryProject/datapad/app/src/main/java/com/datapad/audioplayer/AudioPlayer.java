@@ -1,5 +1,6 @@
 package com.datapad.audioplayer;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -7,20 +8,17 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-public class AudioPlayer extends AppCompatActivity
+public class AudioPlayer extends Activity
 {
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.datapad.audioplayer.PlayNewAudio";
-
+    public static final String Broadcast_STOP_AUDIO = "com.datapad.audioplayer.StopAudio";
     private final String SERVICE_STATE_KEY = "ServiceState";
 
-    //private Activity unityActivity;
+    private static Activity unityActivity;
+    private static MediaPlayerService player;
+    private static boolean serviceBound = false;
 
-    private MediaPlayerService player;
-    private boolean serviceBound = false;
-
-    private final ServiceConnection serviceConnection = new ServiceConnection()
+    private static final ServiceConnection serviceConnection = new ServiceConnection()
     {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service)
@@ -39,6 +37,23 @@ public class AudioPlayer extends AppCompatActivity
     };
 
     @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+
+        if (serviceBound)
+        {
+            unbindService(serviceConnection);
+            player.stopSelf();
+        }
+    }
+
+    public static void setActivityInstance(Activity _unityActivity)
+    {
+        unityActivity = _unityActivity;
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
         savedInstanceState.putBoolean(SERVICE_STATE_KEY, serviceBound);
@@ -52,40 +67,38 @@ public class AudioPlayer extends AppCompatActivity
         serviceBound = savedInstanceState.getBoolean(SERVICE_STATE_KEY);
     }
 
-    @Override
-    protected void onDestroy()
+    public static void StopAudio()
     {
-        super.onDestroy();
+        if (!serviceBound)
+            return;
 
-        if (serviceBound)
-        {
-            unbindService(serviceConnection);
-            player.stopSelf();
-        }
+        Intent broadcastIntent = new Intent(Broadcast_STOP_AUDIO);
+        unityActivity.sendBroadcast(broadcastIntent);
     }
 
-//    // Called From C# to get the Activity Instance
-//    public void setActivityInstance(Activity _unityActivity)
-//    {
-//        unityActivity = _unityActivity;
-//    }
-
-    public void PlayAudio(String path)
+    public static void PlayAudio(String path)
     {
         if (!serviceBound)
         {
-            Intent playerIntent = new Intent(this, MediaPlayerService.class);
-            playerIntent.putExtra(MediaPlayerService.MEDIA_KEY, path);
-            startService(playerIntent);
-            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+            startMediaPlayerService(path);
+            return;
         }
-        else
-        {
-            //Service is active
-            //Send media with BroadcastReceiver
-            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
-            broadcastIntent.putExtra(MediaPlayerService.MEDIA_KEY, path);
-            sendBroadcast(broadcastIntent);
-        }
+
+        broadcastPlayNewAudio(path);
+    }
+
+    private static void startMediaPlayerService(String path)
+    {
+        Intent playerIntent = new Intent(unityActivity, MediaPlayerService.class);
+        playerIntent.putExtra(MediaPlayerService.MEDIA_KEY, path);
+        unityActivity.startService(playerIntent);
+        unityActivity.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private static void broadcastPlayNewAudio(String path)
+    {
+        Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
+        broadcastIntent.putExtra(MediaPlayerService.MEDIA_KEY, path);
+        unityActivity.sendBroadcast(broadcastIntent);
     }
 }
