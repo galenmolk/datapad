@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Datapad
@@ -23,6 +22,8 @@ namespace Datapad
                 return new EditorAudioFileSelector();
             #elif UNITY_ANDROID
                 return new AndroidAudioFileSelector();
+            #elif UNITY_STANDALONE_OSX
+                return new StandaloneAudioFileSelector();
             #else
                 return new UnsupportedAudioFileSelector();
             #endif
