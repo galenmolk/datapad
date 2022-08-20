@@ -1,5 +1,5 @@
 # datapad
-a cross-platform audio player built in unity
+an Android audio player built in unity
 
 <hr>
 
