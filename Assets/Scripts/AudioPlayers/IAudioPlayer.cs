@@ -6,5 +6,9 @@ namespace Datapad.AudioPlayers
     {
         public void PlayAudio(AudioAssetConfig asset);
         public void StopAudio();
+
+        public void TrackComplete();
+
+        public void UpdateNativeLibrary(string libraryJson);
     }
 }

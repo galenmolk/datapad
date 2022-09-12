@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+
 import java.io.IOException;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener, AudioManager.OnAudioFocusChangeListener
@@ -52,12 +53,43 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             // A PLAY_NEW_AUDIO action received
             // Reset mediaPlayer to play the new Audio.
-            mediaFile = newMediaFile;
-            stopMedia();
-            mediaPlayer.reset();
-            initMediaPlayer();
+            PlayAudio(newMediaFile);
         }
     };
+
+    private void PlayAudio(String audioPath)
+    {
+        Log.d("USM Test", "???");
+        UnityMessenger.SendMessage("PlayerHandler", "MessageTest", "Fuck You");
+        mediaFile = audioPath;
+        stopMedia();
+        mediaPlayer.reset();
+        initMediaPlayer();
+    }
+
+    private String GetNextTrack(String currentTrack)
+    {
+        AudioAsset[] library = AudioPlayer.AudioLibrary.Assets;
+        int libraryLength = library.length;
+        int currentTrackIndex = -1;
+
+        for (int i = 0; i < libraryLength; i++)
+        {
+            if ((currentTrack.equals(library[i].LocalPath)))
+            {
+                currentTrackIndex = i;
+                break;
+            }
+        }
+
+        if (currentTrackIndex == -1)
+            return null;
+
+        if (currentTrackIndex < libraryLength - 1)
+            return library[currentTrackIndex + 1].LocalPath;
+        else
+            return library[0].LocalPath;
+    }
 
     private BroadcastReceiver stopAudio = new BroadcastReceiver()
     {
@@ -153,9 +185,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCompletion(MediaPlayer mediaPlayer)
     {
-        mediaFile = "";
-        stopMedia();
-        stopSelf();
+        Log.d("MediaPlayer Log", "onCompletion");
+        PlayAudio(GetNextTrack(mediaFile));
+//        stopMedia();
+//        stopSelf();
     }
 
     @Override

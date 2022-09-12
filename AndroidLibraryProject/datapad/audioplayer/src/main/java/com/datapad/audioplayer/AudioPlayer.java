@@ -7,9 +7,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class AudioPlayer extends Activity
 {
+    public static AudioLibrary AudioLibrary;
+
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.datapad.audioplayer.PlayNewAudio";
     public static final String Broadcast_STOP_AUDIO = "com.datapad.audioplayer.StopAudio";
     private final String SERVICE_STATE_KEY = "ServiceState";
@@ -76,8 +82,11 @@ public class AudioPlayer extends Activity
         unityActivity.sendBroadcast(broadcastIntent);
     }
 
+
     public static void PlayAudio(String path)
     {
+        Log.d("AudioPlayer Log", "PlayAudio");
+
         if (!serviceBound)
         {
             startMediaPlayerService(path);
@@ -85,6 +94,15 @@ public class AudioPlayer extends Activity
         }
 
         broadcastPlayNewAudio(path);
+    }
+
+    public static void UpdateLibrary(String json)
+    {
+        Log.d("AudioPlayer Log", "UpdateLibrary");
+        Gson gson = new GsonBuilder().create();
+        AudioLibrary = gson.fromJson(json, AudioLibrary.class);
+        Log.d("AudioPlayer Log", "Library length: " + AudioLibrary.Assets.length);
+        Log.d("AudioPlayer Log", "Library first element value: " + AudioLibrary.Assets[0].LocalPath);
     }
 
     private static void startMediaPlayerService(String path)

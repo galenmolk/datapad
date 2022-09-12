@@ -12,11 +12,14 @@ namespace Datapad.AudioPlayers
         private const string SetActivityInstanceMethodName = "setActivityInstance";
         private const string PlayAudioMethodName = "PlayAudio";
         private const string StopAudioMethodName = "StopAudio";
+        private const string UpdateLibraryMethodName = "UpdateLibrary";
 
         private AndroidJavaClass _unityClass;
         private AndroidJavaClass _audioPlayer;
         private AndroidJavaObject _unityActivity;
 
+        private AudioAssetConfig lastAudio;
+        
         public AndroidAudioPlayer()
         {
             InitializeAudioPlayerPlugin();
@@ -24,12 +27,34 @@ namespace Datapad.AudioPlayers
         
         public void PlayAudio(AudioAssetConfig asset)
         {
+            lastAudio = asset;
             _audioPlayer.CallStatic(PlayAudioMethodName, asset.LocalPath);
         }
 
         public void StopAudio()
         {
             _audioPlayer.CallStatic(StopAudioMethodName);
+        }
+
+        public void TrackComplete()
+        {
+            Debug.Log("TrackComplete");
+        }
+
+        public void UpdateNativeLibrary(string libraryJson)
+        {
+            Debug.Log("UpdateNativeLibrary Unity");
+            _audioPlayer.CallStatic(UpdateLibraryMethodName, libraryJson);
+        }
+
+        public void MessageTest(string msg)
+        {
+            Debug.Log("This Message Worked: " + msg);
+        }
+
+        public void AudioPlaying()
+        {
+            Debug.Log("AUDIO IS PLAYING - JANE");
         }
 
         private void InitializeAudioPlayerPlugin()

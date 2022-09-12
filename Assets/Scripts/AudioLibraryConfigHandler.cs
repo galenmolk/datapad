@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Datapad.Models;
+using Datapad.Utils;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -8,7 +9,26 @@ namespace Datapad
 {
     public class AudioLibraryConfigHandler : Singleton<AudioLibraryConfigHandler>
     {
+        public static StringEvent OnLibraryJsonChanged = new();
+        
         private const string LibraryConfigFileName = "AudioLibraryConfig.json";
+
+        public string LibraryJson
+        {
+            get
+            {
+                return libraryJson;
+            }
+            private set
+            {
+                libraryJson = value;
+                OnLibraryJsonChanged.Invoke(libraryJson);
+                Debug.Log("OnLibraryJsonChanged");
+            }
+        }
+
+        private string libraryJson;
+        
         private string _audioLibraryConfigPath;
 
         private AudioLibraryConfig AudioLibraryConfig { get; set; }
@@ -36,9 +56,9 @@ namespace Datapad
                 return;
             }
 
-            string libraryJson = File.ReadAllText(_audioLibraryConfigPath);
-            Log(nameof(Awake), $"Config Found: \n{libraryJson}");
-            AudioLibraryConfig = JsonConvert.DeserializeObject<AudioLibraryConfig>(libraryJson);
+            LibraryJson = File.ReadAllText(_audioLibraryConfigPath);
+            Log(nameof(Awake), $"Config Found: \n{LibraryJson}");
+            AudioLibraryConfig = JsonConvert.DeserializeObject<AudioLibraryConfig>(LibraryJson);
         }
 
         private void CreateNewLibraryConfig()
@@ -55,9 +75,9 @@ namespace Datapad
         
         private void SaveConfigToDisk()
         {
-            string libraryJson = JsonConvert.SerializeObject(AudioLibraryConfig);
-            Log(nameof(SaveConfigToDisk), $"Saving New Config: \n{libraryJson}");
-            File.WriteAllText(_audioLibraryConfigPath, libraryJson);
+            LibraryJson = JsonConvert.SerializeObject(AudioLibraryConfig);
+            Log(nameof(SaveConfigToDisk), $"Saving New Config: \n{LibraryJson}");
+            File.WriteAllText(_audioLibraryConfigPath, LibraryJson);
         }
 
         private void Log(string method, string message)

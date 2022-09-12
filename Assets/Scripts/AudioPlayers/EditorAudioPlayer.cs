@@ -23,6 +23,16 @@ namespace Datapad.AudioPlayers
             _audioPlayer.clip = null;
         }
 
+        public void TrackComplete()
+        {
+           Debug.Log("TrackComplete");
+        }
+
+        public void UpdateNativeLibrary(string libraryJson)
+        {
+            throw new System.NotImplementedException();
+        }
+
         private void Awake()
         {
             _audioPlayer = gameObject.GetOrAddComponent<AudioSource>();

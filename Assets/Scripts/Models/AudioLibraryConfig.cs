@@ -9,8 +9,8 @@ namespace Datapad.Models
     [Serializable]
     public class AudioLibraryConfig
     {
-        // [JsonIgnore] 
-        // public static AudioLibraryConfigEvent OnLibraryDeserialized = new();
+        [JsonIgnore] 
+        public static AudioLibraryConfigEvent OnLibraryDeserialized = new();
         
         [JsonProperty(ConfigKeys.ASSETS_KEY)]
         public List<AudioAssetConfig> Assets;
@@ -54,7 +54,7 @@ namespace Datapad.Models
             for (int i = 0; i < Count; i++)
                 _assetPaths.Add(Assets[i].LocalPath);
 
-            //OnLibraryDeserialized.Invoke(this);
+            OnLibraryDeserialized.Invoke(this);
         }
     }
 }
